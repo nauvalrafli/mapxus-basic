@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--access information about networks to support relevant interface-->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!--to access approximate location through Internet-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!--to access precise location-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!--to access information about Wifi networks for positioning-->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!--to change Wifi connectivity state -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <!--to open network socket-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- if your target sdk is above Android 12 , need to declare this permission-->
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MapxusHSITPSample"
+        tools:targetApi="31"
+        android:name=".BaseApplication"
+        >
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.MapxusHSITPSample">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="com.mapxus.api.v1.appid"
+            android:value="637c640843f74240a6b5cdacf15cad5c" />
+        <meta-data
+            android:name="com.mapxus.api.v1.secret"
+            android:value="e9df993a55c24301b75bd407f7b32346" />
+    </application>
+
+</manifest>
