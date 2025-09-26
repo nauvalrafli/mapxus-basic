@@ -132,11 +132,15 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         controller?.mapView?.onDestroy()
+        if(controller?.mapViewProvider != null) {
+            controller?.mapViewProvider?.onDestroy()
+        }
     }
 
     override fun onPause() {
         super.onPause()
         controller?.mapView?.onPause()
+        controller?.getMapxusMap()?.onPause()
     }
 }
 

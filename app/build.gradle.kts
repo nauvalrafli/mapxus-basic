@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-    implementation("com.mapxus.map:mapxusmap:9.4.0")
+    implementation("com.mapxus.map:mapxusmap:10.1.0")
     implementation("com.mapxus.positioning:positioning:2.3.1")
     implementation("com.google.accompanist:accompanist-permissions:0.37.3")
 

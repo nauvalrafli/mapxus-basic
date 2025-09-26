@@ -1,22 +1,9 @@
 package com.example.mapxushsitpsample
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
-import android.os.Build
-import android.os.Handler
-import android.os.Looper
-import android.speech.tts.TextToSpeech
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.mapboxsdk.location.LocationComponentOptions
 import com.mapbox.mapboxsdk.location.modes.RenderMode
@@ -28,24 +15,14 @@ import com.mapxus.map.mapxusmap.api.map.MapxusMap
 import com.mapxus.map.mapxusmap.api.map.interfaces.OnMapxusMapReadyCallback
 import com.mapxus.map.mapxusmap.api.map.model.MapxusMapOptions
 import com.mapxus.map.mapxusmap.api.map.model.SelectorPosition
-import com.mapxus.map.mapxusmap.api.services.RoutePlanning
-import com.mapxus.map.mapxusmap.api.services.RoutePlanning.RoutePlanningResultListener
-import com.mapxus.map.mapxusmap.api.services.constant.RoutePlanningLocale
-import com.mapxus.map.mapxusmap.api.services.constant.RoutePlanningVehicle
 import com.mapxus.map.mapxusmap.api.services.model.building.FloorInfo
-import com.mapxus.map.mapxusmap.api.services.model.planning.InstructionDto
-import com.mapxus.map.mapxusmap.api.services.model.planning.RoutePlanningPoint
-import com.mapxus.map.mapxusmap.api.services.model.planning.RoutePlanningQueryRequest
-import com.mapxus.map.mapxusmap.api.services.model.planning.RoutePlanningResult
+import com.mapxus.map.mapxusmap.api.services.model.floor.Floor
+import com.mapxus.map.mapxusmap.api.services.model.floor.SharedFloor
 import com.mapxus.map.mapxusmap.impl.MapboxMapViewProvider
-import com.mapxus.map.mapxusmap.overlay.model.RoutePainterResource
-import com.mapxus.map.mapxusmap.overlay.navi.NavigationPathDto
-import com.mapxus.map.mapxusmap.overlay.navi.RouteAdsorber
-import com.mapxus.map.mapxusmap.overlay.navi.RouteShortener
-import com.mapxus.map.mapxusmap.overlay.route.RoutePainter
 import com.mapxus.map.mapxusmap.positioning.IndoorLocation
 import com.mapxus.map.mapxusmap.positioning.IndoorLocationProviderListener
 import com.mapxus.positioning.positioning.api.ErrorInfo
+import com.mapxus.positioning.positioning.api.FloorType
 import com.mapxus.positioning.positioning.api.MapxusLocation
 import com.mapxus.positioning.positioning.api.MapxusPositioningClient
 import com.mapxus.positioning.positioning.api.MapxusPositioningListener
@@ -60,10 +37,6 @@ import java.util.Locale
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import kotlin.math.abs
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.roundToInt
-import kotlin.math.sin
 
 class MapxusController(
     val context: Context,
@@ -88,6 +61,8 @@ class MapxusController(
             override fun onMapxusMapReady(p0: MapxusMap?) {
                 Log.d("Location", "Mapxus is ready")
                 mapxusMap = p0
+//                mapxusMap?.mapxusUiSettings?.isBuildingSelectorEnabled = false
+//                mapxusMap?.mapxusUiSettings?.isSelectorEnabled = false
                 mapxusMap?.mapxusUiSettings?.setSelectorPosition(SelectorPosition.TOP_LEFT)
                 mapxusMap?.mapxusUiSettings?.setSelectFontColor(Color.White.hashCode())
                 mapxusMap?.mapxusUiSettings?.setSelectBoxColor(Color(0xFF4285F4).hashCode())
@@ -175,18 +150,27 @@ class MapxusController(
                     location.longitude = mapxusLocation.longitude
                     location.time = System.currentTimeMillis()
                     val building = mapxusLocation.buildingId
-                    val floorInfo = if (mapxusLocation.mapxusFloor == null) null else FloorInfo(
-                        mapxusLocation.mapxusFloor.id,
-                        mapxusLocation.mapxusFloor.code,
-                        mapxusLocation.mapxusFloor.ordinal
-                    )
-
-                    val indoorLocation = IndoorLocation(building, floorInfo, location)
-                    indoorLocation.accuracy = mapxusLocation.accuracy
-
+                    var floor : Floor? = null;
                     if(mapxusLocation.mapxusFloor != null) {
                         mapxusPositioningClient.changeFloor(mapxusLocation.mapxusFloor)
+                        val floorType = mapxusLocation.mapxusFloor.type
+                        if(floorType == FloorType.FLOOR) {
+                            floor = FloorInfo(
+                                mapxusLocation.mapxusFloor.id,
+                                mapxusLocation.mapxusFloor.code,
+                                mapxusLocation.mapxusFloor.ordinal,
+                            )
+                        } else {
+                            floor = SharedFloor(
+                                mapxusLocation.mapxusFloor.id,
+                                mapxusLocation.mapxusFloor.code,
+                                mapxusLocation.mapxusFloor.ordinal
+                            )
+                        }
                     }
+
+                    val indoorLocation = IndoorLocation(building, floor, location)
+                    indoorLocation.accuracy = mapxusLocation.accuracy
 
                     withContext(Dispatchers.Main) {
                         mapxusPositioningProvider.dispatchIndoorLocationChange(indoorLocation)
